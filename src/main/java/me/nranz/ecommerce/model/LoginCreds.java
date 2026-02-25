@@ -2,11 +2,9 @@ package me.nranz.ecommerce.model;
 
 import lombok.*;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@Data
 public class LoginCreds {
 
     private String username;

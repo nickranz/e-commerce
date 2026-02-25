@@ -1,14 +1,13 @@
 package me.nranz.ecommerce.controllers;
 
+import jakarta.validation.Valid;
+import me.nranz.ecommerce.dto.request.RegisterRequest;
+import me.nranz.ecommerce.dto.response.RegisterResponse;
 import me.nranz.ecommerce.entity.User;
 import me.nranz.ecommerce.model.LoginCreds;
-import me.nranz.ecommerce.repositories.UserRepository;
-import me.nranz.ecommerce.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import me.nranz.ecommerce.services.AuthService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,45 +19,22 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final AuthService authService;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
-    public Map<String, Object> registerHandler(
-            @RequestBody User user
-    ) {
-        String encodedPass = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPass);
-        user = userRepository.save(user);
-
-        String token = jwtUtil.generateToken(user.getUsername());
-        return Collections.singletonMap("jwt-token", token);
+    public ResponseEntity<RegisterResponse> registerHandler(@Valid @RequestBody RegisterRequest request) {
+        RegisterResponse response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    public Map<String, Object> loginHandler(
-            @RequestBody LoginCreds body
-    ) {
-        try {
-            UsernamePasswordAuthenticationToken authInputToken =
-                    new UsernamePasswordAuthenticationToken(body.getUsername(), body.getPassword());
-            authenticationManager.authenticate(authInputToken);
-
-            String token = jwtUtil.generateToken(body.getUsername());
-            return Collections.singletonMap("jwt-token", token);
-        } catch (AuthenticationException authExc) {
-            throw new RuntimeException("Invalid username/password.");
-        }
-
+    public Map<String, Object> loginHandler(@RequestBody LoginCreds body) {
+        String token = authService.login(body.getUsername(), body.getPassword());
+        return Collections.singletonMap("jwt-token", token);
     }
 }
