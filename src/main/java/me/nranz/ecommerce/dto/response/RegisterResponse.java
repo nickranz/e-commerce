@@ -10,7 +10,9 @@ import java.util.UUID;
 public class RegisterResponse {
 
     private String token;
+    private final String type = "Bearer";
     private UUID id;
     private String username;
     private String email;
+    private String role;
 }

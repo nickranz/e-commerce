@@ -1,6 +1,8 @@
 package me.nranz.ecommerce.services;
 
+import me.nranz.ecommerce.dto.request.LoginRequest;
 import me.nranz.ecommerce.dto.request.RegisterRequest;
+import me.nranz.ecommerce.dto.response.LoginResponse;
 import me.nranz.ecommerce.dto.response.RegisterResponse;
 import me.nranz.ecommerce.entity.User;
 import me.nranz.ecommerce.exceptions.UserAlreadyExistsException;
@@ -64,9 +66,31 @@ public class AuthService {
                 token,
                 saved.getId(),
                 saved.getUsername(),
-                saved.getEmail()
+                saved.getEmail(),
+                saved.getRole()
         );
 
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        try {
+            String username = request.getUsername();
+            String password = request.getPassword();
+
+            // Authenticate login creds
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+            // If we get here, we've authenticated, create their bearer token and grab login response details.
+            String token = jwtUtil.generateToken(username);
+
+            User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+
+
+            return new LoginResponse(token, user);
+
+        } catch (AuthenticationException e) {
+            throw new RuntimeException("Invalid username/password.");
+        }
     }
 
     public String login(String username, String password) {

@@ -18,13 +18,16 @@ public class JwtUtil {
     @Value("${jwt_secret}")
     private String secret;
 
+
     public String generateToken(String username) throws
             IllegalArgumentException, JWTCreationException {
+        // This is where we add the values for the JWT token.
+        
         return JWT.create()
                 .withSubject("User Details")
                 .withClaim("username", username)
                 .withIssuedAt(new Date())
-                .withIssuer("JOB TRACKER APPLICATION")
+//                .withIssuer("JOB TRACKER APPLICATION")
                 .sign(Algorithm.HMAC256(secret));
 
     }

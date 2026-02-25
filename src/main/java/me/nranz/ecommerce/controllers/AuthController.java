@@ -1,9 +1,10 @@
 package me.nranz.ecommerce.controllers;
 
 import jakarta.validation.Valid;
+import me.nranz.ecommerce.dto.request.LoginRequest;
 import me.nranz.ecommerce.dto.request.RegisterRequest;
+import me.nranz.ecommerce.dto.response.LoginResponse;
 import me.nranz.ecommerce.dto.response.RegisterResponse;
-import me.nranz.ecommerce.entity.User;
 import me.nranz.ecommerce.model.LoginCreds;
 import me.nranz.ecommerce.services.AuthService;
 import org.springframework.http.HttpStatus;
@@ -33,8 +34,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public Map<String, Object> loginHandler(@RequestBody LoginCreds body) {
-        String token = authService.login(body.getUsername(), body.getPassword());
-        return Collections.singletonMap("jwt-token", token);
+    public ResponseEntity<LoginResponse> loginHandler(@RequestBody LoginRequest request) {
+        LoginResponse response = authService.login(request);
+//        String token = authService.login(body.getUsername(), body.getPassword());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }
