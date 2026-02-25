@@ -1,6 +1,3 @@
-Day1 summary · MD
-Copy
-
 # 🛒 E-Commerce Spring Boot — Day 1 Summary
 
 **Date:** February 25, 2026
