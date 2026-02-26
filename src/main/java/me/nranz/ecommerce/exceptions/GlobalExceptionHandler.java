@@ -33,6 +33,14 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, "Username or email already exists.", req.getRequestURI());
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(
+            InvalidCredentialsException ex,
+            HttpServletRequest req
+    ) {
+        return build(HttpStatus.UNAUTHORIZED, ex.getMessage(), req.getRequestURI());
+    }
+
     // Catch-all (keeps your API from leaking stack traces / details)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneric(

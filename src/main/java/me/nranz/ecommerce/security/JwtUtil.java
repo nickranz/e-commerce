@@ -22,7 +22,7 @@ public class JwtUtil {
     public String generateToken(String username) throws
             IllegalArgumentException, JWTCreationException {
         // This is where we add the values for the JWT token.
-        
+
         return JWT.create()
                 .withSubject("User Details")
                 .withClaim("username", username)
@@ -36,7 +36,7 @@ public class JwtUtil {
             JWTVerificationException {
         JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
                 .withSubject("User Details")
-                .withIssuer("JOB TRACKER APPLICATION")
+//                .withIssuer("JOB TRACKER APPLICATION")
                 .build();
 
         DecodedJWT jwt = verifier.verify(token);

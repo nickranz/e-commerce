@@ -5,12 +5,12 @@ import me.nranz.ecommerce.dto.request.RegisterRequest;
 import me.nranz.ecommerce.dto.response.LoginResponse;
 import me.nranz.ecommerce.dto.response.RegisterResponse;
 import me.nranz.ecommerce.entity.User;
+import me.nranz.ecommerce.exceptions.InvalidCredentialsException;
 import me.nranz.ecommerce.exceptions.UserAlreadyExistsException;
 import me.nranz.ecommerce.repositories.UserRepository;
 import me.nranz.ecommerce.security.JwtUtil;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -89,7 +89,7 @@ public class AuthService {
             return new LoginResponse(token, user);
 
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid username/password.");
+            throw new InvalidCredentialsException("Invalid username or password.");
         }
     }
 
@@ -99,7 +99,7 @@ public class AuthService {
             authenticationManager.authenticate(authToken);
             return jwtUtil.generateToken(username);
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid username/password.");
+            throw new InvalidCredentialsException("Invalid username or password.");
         }
     }
 }
