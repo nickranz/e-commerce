@@ -196,3 +196,107 @@ See `LoginRequest.java` for more annotation examples.
 
 ---
 
+# 🛒 E-Commerce Spring Boot — Day 3 Summary
+
+## ✅ Accomplished Today
+
+### Bug Fixes
+
+- **Fixed JWT issuer mismatch** — `withIssuer()` was commented out in token generation but still required in validation,
+  causing all token validations to fail
+- **Fixed empty error response body** — replaced `response.sendError()` with direct JSON writes so Postman returns
+  meaningful error messages on failed auth
+- **Temporarily patched SecurityConfig** — changed `.hasRole("USER")` to `.authenticated()` since user roles are not yet
+  implemented (tracked in SCRUM-24)
+
+### Feature Progress (SCRUM-13 — View and Update User Profile)
+
+- Reviewed existing `GET /api/user/info` endpoint — aligns with acceptance criteria for `GET /api/users/me`
+- Began building `updateUserProfile()` in `UserService`
+- Identified and fixed bug where a new `User` object was being created instead of loading and updating the existing one
+- Discussed and created `UpdateUserProfileRequest` and `UpdateUserProfileResponse` DTOs
+
+---
+
+## 📚 Concepts Learned Today
+
+### Spring Security Request Flow
+
+```
+HTTP Request → JWTFilter → SecurityFilterChain → Controller
+```
+
+- `SecurityConfig` is a rulebook written at startup, not per request
+- The filter chain enforces those rules on every request
+
+### JWT Filter Breakdown
+
+- Token signature, subject, and issuer are validated in `JwtUtil`
+- User existence is confirmed via `loadUserByUsername()` in the filter
+- Only after both pass is the authentication context written to `SecurityContextHolder`
+- `SecurityContextHolder` is wiped after every request (stateless)
+
+### Authentication Context (SecurityContextHolder)
+
+- Acts as a per-request store Spring Security reads to make access decisions
+- `UsernamePasswordAuthenticationToken(username, null, authorities)` — 3 args signals already authenticated
+- `UsernamePasswordAuthenticationToken(username, password)` — 2 args signals needs verification (used at login)
+- Password should be passed as `null` in the filter — credentials aren't needed after JWT validation
+- The badge analogy was refined: it's simply the **authentication context** for the current request
+
+### Stateless vs Stateful Auth
+
+|                                | Stateful (Sessions) | Stateless (JWT) |
+|--------------------------------|---------------------|-----------------|
+| Server stores session          | ✅ Yes               | ❌ No            |
+| Scales across multiple servers | ❌ Hard              | ✅ Easy          |
+| Can invalidate token early     | ✅ Yes               | ❌ Not easily    |
+
+- JWT expiry + refresh tokens is the standard solution to the invalidation problem (tracked in backlog)
+
+### DTOs (Data Transfer Objects)
+
+- Control exactly what fields are accepted in requests and returned in responses
+- Prevent clients from sending sensitive fields like `role` or `password` in update requests
+- Tradeoff: tight coupling to endpoints means updating the data model requires updating DTOs too
+- Decision made to continue using DTOs — security and control benefits outweigh maintenance cost
+
+### Identity Providers (Cognito, Entra ID)
+
+- Everything built manually today (filter, JwtUtil, UserDetailsService, SecurityConfig) is handled automatically by IdP
+  SDKs
+- Building it manually is valuable — you now understand what those SDKs do under the hood
+
+### SecurityContext vs Bearer Token
+
+- Spring Security doesn't understand JWT natively — it only understands the authentication context
+- The filter acts as a translation layer: JWT → authentication context
+- This means swapping auth providers (e.g. to Cognito) only requires changing the filter, not Spring Security rules
+
+### Pulling Username from SecurityContext
+
+- Correct pattern for authenticated endpoints — never trust username from request body
+- User can't manipulate the SecurityContext since it was set by the validated JWT
+
+### DB Update Pattern
+
+- Load → Update → Save (2 DB calls, updates all columns) vs direct `@Query` update (1 DB call, updates specific columns)
+- For low-frequency endpoints like profile updates, Load → Update → Save is acceptable
+- Direct queries are better for high-frequency or bulk operations
+
+---
+
+## 🗂 Backlog Updates
+
+| Ticket   | Summary                                             | Status |
+|----------|-----------------------------------------------------|--------|
+| SCRUM-24 | Implement User Roles (ROLE_USER / ROLE_ADMIN)       | To Do  |
+| SCRUM-25 | Implement JWT Expiration and Refresh Token Workflow | To Do  |
+
+---
+
+## 📅 Up Next — Day 4
+
+- Write first unit tests using JUnit 5 + Mockito against `UserService`
+- Complete SCRUM-13 (update profile endpoint)
+- Consider starting product catalog
