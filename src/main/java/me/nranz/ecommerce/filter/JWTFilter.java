@@ -37,11 +37,16 @@ public class JWTFilter extends OncePerRequestFilter {
                 return;
             } else {
                 try {
+                    // verify signature, check subject/issuer
                     String username = jwtUtil.validateTokenAndRetrieveSubject(jwt);
+                    // from jwt, if the username exist in DB, load users data
+                    // if not found -> exception -> request dies here
                     UserDetails userDetails = userDetailService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, userDetails.getPassword(), userDetails.getAuthorities());
+                    // create Authentication Context
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
 
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                        // set auth context
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
                 } catch (JWTVerificationException exc) {
