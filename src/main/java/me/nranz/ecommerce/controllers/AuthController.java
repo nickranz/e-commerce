@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.Map;
+// import java.util.Collections;
+// import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> loginHandler(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
-//        String token = authService.login(body.getUsername(), body.getPassword());
+        // String token = authService.login(body.getUsername(), body.getPassword());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }
